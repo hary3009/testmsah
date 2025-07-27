@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Upload MSAH</title>
+</head>
+<body>
+  <h2>Test Upload KTP & Foto Profil</h2>
+  
+  <form id="testForm">
+    <div>
+      <label>Nama:</label>
+      <input type="text" id="nama" required>
+    </div>
+    
+    <div>
+      <label>WhatsApp:</label>
+      <input type="text" id="whatsapp" required>
+    </div>
+    
+    <div>
+      <label>Foto KTP:</label>
+      <input type="file" id="ktpFile" accept="image/*,.pdf" required>
+    </div>
+    
+    <div>
+      <label>Foto Profil:</label>
+      <input type="file" id="fotoFile" accept="image/*" required>
+    </div>
+    
+    <button type="button" onclick="submitForm()">Kirim Test</button>
+  </form>
+  
+  <div id="result"></div>
+
+  <script>
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbwPditkp4YsNPUq75HqaDriKJs7ex1zzxJ6qS9iopw7kGjWN0YgVSJz4aOTCMtnwBY6NA/exec'; // Ganti dengan URL GAS Anda
+    
+    function submitForm() {
+      const formData = new FormData();
+      formData.append('nama', document.getElementById('nama').value);
+      formData.append('whatsapp', document.getElementById('whatsapp').value);
+      formData.append('ktpFile', document.getElementById('ktpFile').files[0]);
+      formData.append('fotoFile', document.getElementById('fotoFile').files[0]);
+      
+      fetch(scriptUrl, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('result').innerHTML = `
+          <p>Status: ${data.status}</p>
+          <p>Link KTP: <a href="${data.linkKTP}" target="_blank">Lihat</a></p>
+          <p>Link Foto: <a href="${data.linkFoto}" target="_blank">Lihat</a></p>
+        `;
+      })
+      .catch(error => {
+        document.getElementById('result').innerHTML = `Error: ${error.message}`;
+      });
+    }
+  </script>
+</body>
+</html>
