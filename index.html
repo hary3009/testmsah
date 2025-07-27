@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">url
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Upload MSAH</title>
+    <title>Upload System MSAH</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -32,6 +32,10 @@
             padding: 10px 15px;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 16px;
+        }
+        button:disabled {
+            background: #cccccc;
         }
         #result {
             margin-top: 20px;
@@ -46,134 +50,129 @@
             background: #fce8e6;
             border: 1px solid #d93025;
         }
-        .debug {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f1f3f4;
-            border-radius: 4px;
-            font-family: monospace;
-            white-space: pre-wrap;
+        .progress {
+            background: #e8f0fe;
+            border: 1px solid #4285f4;
         }
     </style>
 </head>
 <body>
-    <h1>Test Upload MSAH</h1>
-    <p>Form untuk testing upload KTP dan Foto Profil</p>
+    <h1>Upload System MSAH</h1>
+    <p>Form untuk mengupload KTP dan Foto Profil</p>
     
     <div class="form-group">
-        <label for="nama">Nama:</label>
+        <label for="nama">Nama Lengkap:</label>
         <input type="text" id="nama" required>
     </div>
     
     <div class="form-group">
-        <label for="whatsapp">WhatsApp:</label>
+        <label for="whatsapp">Nomor WhatsApp:</label>
         <input type="text" id="whatsapp" required>
     </div>
     
     <div class="form-group">
-        <label for="ktpFile">Foto KTP (JPEG/PNG/PDF):</label>
+        <label for="ktpFile">Foto KTP (JPEG/PNG/PDF, max 5MB):</label>
         <input type="file" id="ktpFile" accept="image/*,.pdf" required>
     </div>
     
     <div class="form-group">
-        <label for="fotoFile">Foto Profil (JPEG/PNG):</label>
+        <label for="fotoFile">Foto Profil (JPEG/PNG, max 5MB):</label>
         <input type="file" id="fotoFile" accept="image/*" required>
     </div>
     
-    <button onclick="submitForm()">Kirim Test</button>
+    <button id="submitBtn" onclick="submitForm()">Kirim Data</button>
     
     <div id="result"></div>
-    
-    <div class="debug">
-        <h3>Debug Info:</h3>
-        <div id="debugInfo"></div>
-    </div>
-<script>
-    const scriptUrl = 'https://script.google.com/macros/s/AKfycbxiylfr_rIzlXU5dVebvWbfeFWo5d9Doelh_EJlIwGtfIXNuU86XZC31Z1nrW_PZY66tw/exec';
-    
-    function logDebug(message) {
-        const debugDiv = document.getElementById('debugInfo');
-        debugDiv.innerHTML += `<p>[${new Date().toLocaleTimeString()}] ${message}</p>`;
-        console.log(message);
-    }
-    
-    async function submitForm() {
-        try {
-            logDebug("Memulai proses submit...");
-            
-            const nama = document.getElementById('nama').value;
-            const whatsapp = document.getElementById('whatsapp').value;
-            const ktpFileInput = document.getElementById('ktpFile');
-            const fotoFileInput = document.getElementById('fotoFile');
-            
-            // Validasi
-            if (!ktpFileInput.files[0] || !fotoFileInput.files[0]) {
-                throw new Error("Harap pilih file KTP dan Foto Profil");
-            }
-            
-            const ktpFile = ktpFileInput.files[0];
-            const fotoFile = fotoFileInput.files[0];
-            
-            logDebug(`Data: Nama=${nama}, WhatsApp=${whatsapp}`);
-            logDebug(`File: KTP=${ktpFile.name} (${ktpFile.type}), Foto=${fotoFile.name} (${fotoFile.type})`);
-            
-            const formData = new FormData();
-            formData.append('nama', nama);
-            formData.append('whatsapp', whatsapp);
-            
-            // Perubahan penting di sini - tambahkan filename sebagai parameter ketiga
-            formData.append('ktpFile', ktpFile, ktpFile.name);
-            formData.append('fotoFile', fotoFile, fotoFile.name);
-            
-            logDebug("Mengirim data ke GAS...");
-            
-            const response = await fetch(scriptUrl, {
-                method: 'POST',
-                body: formData
-                // Jangan tambahkan headers Content-Type secara manual
-                // Biarkan browser mengatur otomatis untuk FormData
-            });
-            
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP error! Status: ${response.status}, Response: ${errorText}`);
-            }
-            
-            const result = await response.json();
-            logDebug("Response dari GAS: " + JSON.stringify(result, null, 2));
-            
-            // Tampilkan hasil
-            const resultDiv = document.getElementById('result');
-            resultDiv.className = 'success';
-            resultDiv.innerHTML = `
-                <h3>Berhasil!</h3>
-                <p>Status: ${result.status}</p>
-                ${result.linkKTP ? `<p><a href="${result.linkKTP}" target="_blank">Lihat KTP</a></p>` : ''}
-                ${result.linkFoto ? `<p><a href="${result.linkFoto}" target="_blank">Lihat Foto Profil</a></p>` : ''}
-            `;
-            
-        } catch (error) {
-            logDebug("ERROR: " + error.message);
-            
-            const resultDiv = document.getElementById('result');
-            resultDiv.className = 'error';
-            resultDiv.innerHTML = `
-                <h3>Gagal!</h3>
-                <p>${error.message}</p>
-                <p>Cek console untuk detail error (F12 > Console)</p>
-            `;
-        }
-    }
-    
-    // Tambahkan event listener untuk form
-    document.addEventListener('DOMContentLoaded', () => {
-        logDebug("Script siap, silakan isi form dan klik Kirim Test");
-        
-        // Optional: Tambahkan handler untuk form submit
-        const form = document.querySelector('button');
-        form.addEventListener('click', submitForm);
-    });
-</script>
 
+    <script>
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbwZOeHCQcHGMSYb1xQN9keyMqvrt6dOZh25LoWtQq0o52WqoO8zCKfPn2P-e9aO1K4Lng/exec';
+        const submitBtn = document.getElementById('submitBtn');
+        
+        async function submitForm() {
+            submitBtn.disabled = true;
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'progress';
+            resultDiv.innerHTML = '<p>Mengupload data, harap tunggu...</p>';
+            
+            try {
+                // Get form values
+                const nama = document.getElementById('nama').value;
+                const whatsapp = document.getElementById('whatsapp').value;
+                const ktpFile = document.getElementById('ktpFile').files[0];
+                const fotoFile = document.getElementById('fotoFile').files[0];
+                
+                // Validate
+                if (!nama || !whatsapp || !ktpFile || !fotoFile) {
+                    throw new Error("Harap isi semua field dan pilih kedua file");
+                }
+                
+                // Convert files to base64
+                const [ktpBase64, fotoBase64] = await Promise.all([
+                    readFileAsBase64(ktpFile),
+                    readFileAsBase64(fotoFile)
+                ]);
+                
+                // Prepare data
+                const formData = new URLSearchParams();
+                formData.append('nama', nama);
+                formData.append('whatsapp', whatsapp);
+                formData.append('ktpFile', ktpBase64.split(',')[1]);
+                formData.append('ktpType', ktpFile.type);
+                formData.append('ktpName', ktpFile.name);
+                formData.append('fotoFile', fotoBase64.split(',')[1]);
+                formData.append('fotoType', fotoFile.type);
+                formData.append('fotoName', fotoFile.name);
+                
+                // Send to GAS
+                const response = await fetch(scriptUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Gagal mengupload data');
+                }
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    resultDiv.className = 'success';
+                    resultDiv.innerHTML = `
+                        <h3>Upload Berhasil!</h3>
+                        <p>Data telah tersimpan</p>
+                        ${result.linkKTP ? `<p><a href="${result.linkKTP}" target="_blank">Lihat KTP</a></p>` : ''}
+                        ${result.linkFoto ? `<p><a href="${result.linkFoto}" target="_blank">Lihat Foto Profil</a></p>` : ''}
+                        <p>Silakan cek spreadsheet untuk verifikasi</p>
+                    `;
+                } else {
+                    throw new Error(result.message || 'Terjadi kesalahan');
+                }
+                
+            } catch (error) {
+                resultDiv.className = 'error';
+                resultDiv.innerHTML = `
+                    <h3>Gagal Mengupload</h3>
+                    <p>${error.message}</p>
+                    <p>Silakan coba lagi atau hubungi admin</p>
+                `;
+                console.error('Upload error:', error);
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+        
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+    </script>
 </body>
 </html>
