@@ -88,76 +88,92 @@
         <h3>Debug Info:</h3>
         <div id="debugInfo"></div>
     </div>
-
-    <script>
-        // Ganti dengan URL GAS Anda
-        const scriptUrl = 'https://script.google.com/macros/s/AKfycbwZOeHCQcHGMSYb1xQN9keyMqvrt6dOZh25LoWtQq0o52WqoO8zCKfPn2P-e9aO1K4Lng/exec';
-        
-        function logDebug(message) {
-            const debugDiv = document.getElementById('debugInfo');
-            debugDiv.innerHTML += `<p>[${new Date().toLocaleTimeString()}] ${message}</p>`;
-            console.log(message);
-        }
-        
-        async function submitForm() {
-            try {
-                logDebug("Memulai proses submit...");
-                
-                const nama = document.getElementById('nama').value;
-                const whatsapp = document.getElementById('whatsapp').value;
-                const ktpFile = document.getElementById('ktpFile').files[0];
-                const fotoFile = document.getElementById('fotoFile').files[0];
-                
-                // Validasi
-                if (!ktpFile || !fotoFile) {
-                    throw new Error("Harap pilih file KTP dan Foto Profil");
-                }
-                
-                logDebug(`Data: Nama=${nama}, WhatsApp=${whatsapp}`);
-                logDebug(`File: KTP=${ktpFile.name} (${ktpFile.type}), Foto=${fotoFile.name} (${fotoFile.type})`);
-                
-                const formData = new FormData();
-                formData.append('nama', nama);
-                formData.append('whatsapp', whatsapp);
-                formData.append('ktpFile', ktpFile);
-                formData.append('fotoFile', fotoFile);
-                
-                logDebug("Mengirim data ke GAS...");
-                
-                const response = await fetch(scriptUrl, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP error! Status: ${response.status}, Response: ${errorText}`);
-                }
-                
-                const result = await response.json();
-                logDebug("Response dari GAS: " + JSON.stringify(result, null, 2));
-                
-                document.getElementById('result').className = 'success';
-                document.getElementById('result').innerHTML = `
-                    <h3>Berhasil!</h3>
-                    <p>Status: ${result.status}</p>
-                    ${result.linkKTP ? `<p><a href="${result.linkKTP}" target="_blank">Lihat KTP</a></p>` : ''}
-                    ${result.linkFoto ? `<p><a href="${result.linkFoto}" target="_blank">Lihat Foto Profil</a></p>` : ''}
-                `;
-                
-            } catch (error) {
-                logDebug("ERROR: " + error.message);
-                
-                document.getElementById('result').className = 'error';
-                document.getElementById('result').innerHTML = `
-                    <h3>Gagal!</h3>
-                    <p>${error.message}</p>
-                    <p>Cek console untuk detail error (F12 > Console)</p>
-                `;
+<script>
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbzK4PMbsshW1Nf-TWQBWQzM_UV25OHDs8Vxlz5NuL71-KKXCvFdLVRnR3d1CgivJSKbxA/exec';
+    
+    function logDebug(message) {
+        const debugDiv = document.getElementById('debugInfo');
+        debugDiv.innerHTML += `<p>[${new Date().toLocaleTimeString()}] ${message}</p>`;
+        console.log(message);
+    }
+    
+    async function submitForm() {
+        try {
+            logDebug("Memulai proses submit...");
+            
+            const nama = document.getElementById('nama').value;
+            const whatsapp = document.getElementById('whatsapp').value;
+            const ktpFileInput = document.getElementById('ktpFile');
+            const fotoFileInput = document.getElementById('fotoFile');
+            
+            // Validasi
+            if (!ktpFileInput.files[0] || !fotoFileInput.files[0]) {
+                throw new Error("Harap pilih file KTP dan Foto Profil");
             }
+            
+            const ktpFile = ktpFileInput.files[0];
+            const fotoFile = fotoFileInput.files[0];
+            
+            logDebug(`Data: Nama=${nama}, WhatsApp=${whatsapp}`);
+            logDebug(`File: KTP=${ktpFile.name} (${ktpFile.type}), Foto=${fotoFile.name} (${fotoFile.type})`);
+            
+            const formData = new FormData();
+            formData.append('nama', nama);
+            formData.append('whatsapp', whatsapp);
+            
+            // Perubahan penting di sini - tambahkan filename sebagai parameter ketiga
+            formData.append('ktpFile', ktpFile, ktpFile.name);
+            formData.append('fotoFile', fotoFile, fotoFile.name);
+            
+            logDebug("Mengirim data ke GAS...");
+            
+            const response = await fetch(scriptUrl, {
+                method: 'POST',
+                body: formData
+                // Jangan tambahkan headers Content-Type secara manual
+                // Biarkan browser mengatur otomatis untuk FormData
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! Status: ${response.status}, Response: ${errorText}`);
+            }
+            
+            const result = await response.json();
+            logDebug("Response dari GAS: " + JSON.stringify(result, null, 2));
+            
+            // Tampilkan hasil
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'success';
+            resultDiv.innerHTML = `
+                <h3>Berhasil!</h3>
+                <p>Status: ${result.status}</p>
+                ${result.linkKTP ? `<p><a href="${result.linkKTP}" target="_blank">Lihat KTP</a></p>` : ''}
+                ${result.linkFoto ? `<p><a href="${result.linkFoto}" target="_blank">Lihat Foto Profil</a></p>` : ''}
+            `;
+            
+        } catch (error) {
+            logDebug("ERROR: " + error.message);
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'error';
+            resultDiv.innerHTML = `
+                <h3>Gagal!</h3>
+                <p>${error.message}</p>
+                <p>Cek console untuk detail error (F12 > Console)</p>
+            `;
         }
-        
+    }
+    
+    // Tambahkan event listener untuk form
+    document.addEventListener('DOMContentLoaded', () => {
         logDebug("Script siap, silakan isi form dan klik Kirim Test");
-    </script>
+        
+        // Optional: Tambahkan handler untuk form submit
+        const form = document.querySelector('button');
+        form.addEventListener('click', submitForm);
+    });
+</script>
+
 </body>
 </html>
